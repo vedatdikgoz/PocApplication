@@ -1,0 +1,92 @@
+﻿@model StudentListViewModel
+@{
+    ViewData["Title"] = "Student Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex mb-3">
+<a asp-action="Create" asp-controller="Student" class="btn btn-outline-success btn-sm me-2">Öğrenci Ekle</a>
+<a asp-action="Create" asp-controller="Course" class="btn btn-outline-success btn-sm me-2">Kurs Ekle</a>
+<input class="form-control me-2" id="searchInput" type="text" placeholder="Ara...">
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Full Name</th>
+            <th scope="col">Number</th>
+            <th scope="col">Email</th>
+            <th scope="col">GSM Number</th>
+            <th scope="col">Kurslar</th>
+            <th scope="col">Not Ortalaması</th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        @foreach (var item in Model.Students)
+        {
+            <tr>
+                <td>@item.FullName</td>
+                <td>@item.Number</td>
+                <td>@item.Email</td>
+                <td>@item.GsmNumber</td>
+                <td>
+                    @if (item.ExamResults != null)
+                    {
+                        foreach (var examResult in item.ExamResults)
+                        {
+                            if (examResult.Course != null)
+                            {
+                                @examResult.Course.Name @examResult.Score
+                                @if (examResult.Score == 3)
+                                {
+                                    <i class="fas fa-check"></i>
+                                }
+                                <br>
+                            }
+                        }
+                    }
+                </td>
+                <td>
+                    @if (item.ExamResults != null)
+                    {
+                        var completedCourses = item.ExamResults.Where(er => er.Course != null).ToList();
+                        if (completedCourses.Count > 0)
+                        {
+                            var averageScore = completedCourses.Average(er => er.Score);
+                            <p>@averageScore.ToString("0.00")</p>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<script>
+    const tableBody = document.getElementById('table-body');
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', () => {
+        const filterValue = searchInput.value.toLowerCase();
+        const tableRows = tableBody.querySelectorAll('tr');
+
+        tableRows.forEach((row) => {
+            const rowCells = row.querySelectorAll('td');
+            let match = false;
+
+            rowCells.forEach((cell) => {
+                const cellText = cell.textContent.toLowerCase();
+                if (cellText.includes(filterValue)) {
+                    match = true;
+                }
+            });
+
+            if (match) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
